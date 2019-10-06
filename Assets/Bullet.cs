@@ -23,7 +23,10 @@ public class Bullet : MonoBehaviour
     {
         if (other.gameObject.tag != "Player")
         {
-            other.gameObject.SendMessage("Hit", damage);
+            if (other.gameObject.tag == "Zombie")
+            {
+                other.gameObject.SendMessage("Hit", damage);
+            }
             Destroy(gameObject);
         }
     }

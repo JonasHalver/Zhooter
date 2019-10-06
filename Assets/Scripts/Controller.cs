@@ -21,6 +21,7 @@ public class Controller : MonoBehaviour
     void Start()
     {
         player = GameObject.FindGameObjectWithTag("Player");
+        StartCoroutine(ForwardCheck());
     }
 
     // Update is called once per frame
@@ -29,7 +30,8 @@ public class Controller : MonoBehaviour
         //if (target == null)        
         //    target = player;
 
-        dirToTarget = target.GetComponent<Rigidbody2D>().position - rb.position;
+        if (target != null)
+            dirToTarget = target.GetComponent<Rigidbody2D>().position - rb.position;
 
         if (health <= 0)
         {
@@ -46,14 +48,18 @@ public class Controller : MonoBehaviour
         }
         else
         {
+            rb.MovePosition(rb.position + new Vector2(transform.up.x, transform.up.y) * moveSpeed * Time.fixedDeltaTime);
+
             if (obstacleInView)
             {
-                rb.MovePosition(rb.position + new Vector2(0, 1) * moveSpeed * Time.fixedDeltaTime);
-
                 if (FindValidPath())
                     transform.Rotate(new Vector3(0, 0, 1) * Time.fixedDeltaTime * rotateSpeed);
                 else
                     transform.Rotate(new Vector3(0, 0, -1) * Time.fixedDeltaTime * rotateSpeed);
+            }
+            else
+            {
+                
             }
         }
     }
@@ -74,6 +80,8 @@ public class Controller : MonoBehaviour
         sr.color = new Color(c.r * 0.5f, c.g * 0.5f, c.b * 0.5f);
     }
 
+
+
     IEnumerator ForwardCheck()
     {
         while (true)
@@ -87,10 +95,12 @@ public class Controller : MonoBehaviour
     public void RayCast(Vector2 dir)
     {
         RaycastHit2D hit = Physics2D.Raycast(transform.position, dir, radius, obstacleMask);
+        
         if (hit.collider != null)
         {
             if (hit.collider.tag == "Obstacle")
             {
+                print("Detecting obstacle");
                 obstacleInView = true;
             }
         }
@@ -145,7 +155,7 @@ public class Controller : MonoBehaviour
 
     public Vector2 DirFromAngle(float angleInDegrees)
     {
-        angleInDegrees += transform.eulerAngles.z;
-        return new Vector2(Mathf.Sin(angleInDegrees * Mathf.Deg2Rad), Mathf.Cos(angleInDegrees * Mathf.Deg2Rad));
+        angleInDegrees += transform.eulerAngles.z + 90f;
+        return new Vector2(Mathf.Cos(angleInDegrees * Mathf.Deg2Rad), Mathf.Sin(angleInDegrees * Mathf.Deg2Rad));
     }
 }
