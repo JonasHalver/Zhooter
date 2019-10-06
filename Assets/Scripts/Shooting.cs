@@ -12,6 +12,7 @@ public class Shooting : MonoBehaviour
     public Transform ammoPanel;
 
     public int ammoMax = 8, ammoSpent = 0;
+    public float damage = 40f;
 
     // Update is called once per frame
     void Update()
@@ -32,7 +33,7 @@ public class Shooting : MonoBehaviour
     {
         GameObject newBullet = Instantiate(shotPrefab, shootPoint.position, Quaternion.identity);
         Rigidbody2D rb = newBullet.GetComponent<Rigidbody2D>();
-
+        newBullet.GetComponent<Bullet>().damage = damage;
         rb.AddForce(-shootPoint.up * shotForce, ForceMode2D.Impulse);
         Image img = ammoPanel.GetChild(ammoSpent).GetComponent<Image>();
         var alpha = img.color;

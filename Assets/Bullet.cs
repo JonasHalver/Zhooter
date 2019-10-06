@@ -5,6 +5,7 @@ using UnityEngine;
 public class Bullet : MonoBehaviour
 {
     public Color hitColor = Color.red;
+    public float damage;
 
     // Start is called before the first frame update
     void Start()
@@ -22,7 +23,7 @@ public class Bullet : MonoBehaviour
     {
         if (other.gameObject.tag != "Player")
         {
-            other.gameObject.SendMessage("Hit", hitColor);
+            other.gameObject.SendMessage("Hit", damage);
             Destroy(gameObject);
         }
     }
