@@ -15,6 +15,8 @@ public class CameraController : MonoBehaviour
 
     void LateUpdate()
     {
+        // TODO: Try using movement inputs to control the camera directly. Overshoot the player to show where you are going, then snap back once the movement stops.
+
         playerPos = player.transform.position;
         transform.position = Vector3.Lerp(transform.position, playerPos + new Vector3(0, 0, -10), 2 * Time.deltaTime);
     }

@@ -13,6 +13,8 @@ public class Shooting : MonoBehaviour
 
     public int ammoMax = 8, ammoSpent = 0;
     public float damage = 40f;
+    public float soundRadius = 5;
+    public LayerMask enemyMask;
 
     // Update is called once per frame
     void Update()
@@ -39,9 +41,18 @@ public class Shooting : MonoBehaviour
         var alpha = img.color;
         alpha.a = 0;
         img.color = alpha;
-
+        SoundWave();
         ammoSpent++;
         Destroy(newBullet, 2f);
+    }
+
+    public void SoundWave()
+    {
+        Collider2D[] enemies = Physics2D.OverlapCircleAll(transform.position, soundRadius, enemyMask);
+        foreach(Collider2D enemy in enemies)
+        {
+            enemy.gameObject.GetComponent<Controller>().SendMessage("SoundHeard", (Vector2)transform.position);
+        }
     }
 
     public void Reload()
