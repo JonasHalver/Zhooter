@@ -10,11 +10,12 @@ public class CameraController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        playerPos = player.transform.position;
+        
     }
 
     void LateUpdate()
     {
-        transform.position = playerPos + new Vector3(0, 0, -10);
+        playerPos = player.transform.position;
+        transform.position = Vector3.Lerp(transform.position, playerPos + new Vector3(0, 0, -10), 2 * Time.deltaTime);
     }
 }

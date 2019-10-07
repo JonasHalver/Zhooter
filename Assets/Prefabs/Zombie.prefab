@@ -336,7 +336,7 @@ MonoBehaviour:
   target: {fileID: 0}
   rays: 10
   radius: 5
-  viewAngle: 90
+  viewAngle: 100
   rotateSpeed: 180
   obstacleMask:
     serializedVersion: 2
