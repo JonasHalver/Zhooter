@@ -29,9 +29,12 @@ public class Controller : MonoBehaviour
     public bool reachedEndOfPath;
     float nextWayPointDistance = .5f;
     Vector2 direction;
+    bool pause;
+    float prevMoveSpeed;
 
     void Start()
     {
+        prevMoveSpeed = moveSpeed;
         player = GameObject.FindGameObjectWithTag("Player");
         seeker = GetComponent<Seeker>();
         StartCoroutine(ForwardCheck());
@@ -54,6 +57,12 @@ public class Controller : MonoBehaviour
 
     void FixedUpdate()
     {
+        QueueResolution();
+        if (pause)
+            moveSpeed = 0;
+        else
+            moveSpeed = prevMoveSpeed;
+
         if (path != null)
         {
             if (currentWayPoint >= path.vectorPath.Count)
@@ -78,7 +87,10 @@ public class Controller : MonoBehaviour
         switch (currentState)
         {
             case State.Idle:
-                IdleMovement();
+                if (path == null)
+                    CreateIdleDestination();
+                else
+                    IdleMovement(direction);
                 if (target != null)
                     currentState = State.Chasing;
                 break;
@@ -99,23 +111,28 @@ public class Controller : MonoBehaviour
         Gizmos.DrawWireSphere(transform.position, radius);
     }
 
-    public void IdleMovement()
+    public void IdleMovement(Vector2 direction)
     {
-        rb.MovePosition(rb.position + new Vector2(transform.up.x, transform.up.y) * moveSpeed * Time.fixedDeltaTime);
-
-        if (obstacleInView)
-        {
-            if (FindValidPath())
-                transform.Rotate(new Vector3(0, 0, 1) * Time.fixedDeltaTime * rotateSpeed);
-            else
-                transform.Rotate(new Vector3(0, 0, -1) * Time.fixedDeltaTime * rotateSpeed);
-        }
+        //rb.MovePosition(rb.position + new Vector2(transform.up.x, transform.up.y) * moveSpeed * Time.fixedDeltaTime);
+        //
+        //if (obstacleInView)
+        //{
+        //    if (FindValidPath())
+        //        transform.Rotate(new Vector3(0, 0, 1) * Time.fixedDeltaTime * rotateSpeed);
+        //    else
+        //        transform.Rotate(new Vector3(0, 0, -1) * Time.fixedDeltaTime * rotateSpeed);
+        //}
 
         //Idea isn't bad, just give it a delay by adding to float t += time.deltattime
         //if (rb.velocity.magnitude < .01f)
         //{
         //    rb.rotation += 90;
         //}
+
+        rb.MovePosition(rb.position + direction * moveSpeed * Time.fixedDeltaTime);
+        float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg - 90f;
+        rb.rotation = angle;
+
     }
     
     public void ChaseMovement()
@@ -189,11 +206,32 @@ public class Controller : MonoBehaviour
     public void SearchArea(Vector2 pos)
     {
         if (seeker.IsDone())
-            seeker.StartPath(rb.position, pos, OnPathComplete);
+            seeker.StartPath(rb.position, pos, OnPathCompleteSearch);
         
     }
 
-    void OnPathComplete(Path p)
+    public void CreateIdleDestination()
+    {
+        Vector2 newPos = Random.insideUnitCircle * 8;
+        if (seeker.IsDone())
+            seeker.StartPath(rb.position, newPos, OnPathCompleteIdle);
+    }
+
+    void OnPathCompleteIdle(Path p)
+    {
+        if (!p.error)
+        {
+            path = p;
+            currentWayPoint = 0;
+        }
+        else
+        {
+            path = null;
+            currentWayPoint = 0;
+        }
+    }
+
+    void OnPathCompleteSearch(Path p)
     {
         if (!p.error)
         {
@@ -201,6 +239,15 @@ public class Controller : MonoBehaviour
             currentWayPoint = 0;
             currentState = State.Searching;
         }
+    }
+
+    void QueueResolution()
+    {
+        Debug.DrawRay(rb.position, transform.up * 3);
+        if (Physics2D.Raycast(transform.position + transform.up, transform.up, 2, 10))
+            pause = true;
+        else
+            pause = false;
     }
 
     IEnumerator HitColor(float damage)
