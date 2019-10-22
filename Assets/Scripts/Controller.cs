@@ -19,7 +19,7 @@ public class Controller : MonoBehaviour
 
     public int rays = 10;
     public float radius = 1, viewAngle = 90, rotateSpeed = 180f;
-    public LayerMask obstacleMask, playerAndObstacleMask;
+    public LayerMask obstacleMask, playerAndObstacleMask, barricadeMask;
     bool obstacleInView, lookingAtPlayer, investigateSound;
 
     Vector2 lastPos = new Vector2();
@@ -32,12 +32,20 @@ public class Controller : MonoBehaviour
     bool pause;
     float prevMoveSpeed;
 
+    public SpriteRenderer attack;
+    public float attackRange = 2, attackDamage = 20, attackSpeed = 1;
+    Vector2 attackPoint;
+    public GameObject attackTarget;
+    bool rangeCheck, withinRange;
+
     void Start()
     {
         prevMoveSpeed = moveSpeed;
         player = GameObject.FindGameObjectWithTag("Player");
         seeker = GetComponent<Seeker>();
         StartCoroutine(ForwardCheck());
+        StartCoroutine(CheckIfBarricadeOnPath());
+        StartCoroutine(Attack());
     }
 
     // Update is called once per frame
@@ -57,11 +65,11 @@ public class Controller : MonoBehaviour
 
     void FixedUpdate()
     {
-        QueueResolution();
-        if (pause)
-            moveSpeed = 0;
-        else
-            moveSpeed = prevMoveSpeed;
+        //QueueResolution();
+        //if (pause)
+        //    moveSpeed = 0;
+        //else
+        //    moveSpeed = prevMoveSpeed;
 
         if (path != null)
         {
@@ -90,12 +98,21 @@ public class Controller : MonoBehaviour
                 if (path == null)
                     CreateIdleDestination();
                 else
-                    IdleMovement(direction);
+                    IdleMovement(direction);                
                 if (target != null)
                     currentState = State.Chasing;
+                if (attackTarget != null && attackTarget.CompareTag("Barricade"))
+                    StartCoroutine(TargetInRange());
+                else
+                    rangeCheck = false;
                 break;
             case State.Chasing:
+                if (attackTarget == null)
+                    attackTarget = target;
+                if (!rangeCheck)
+                    StartCoroutine(TargetInRange());
                 ChaseMovement();
+                
                 break;
             case State.Searching:
                 SearchMovement(direction);
@@ -111,6 +128,7 @@ public class Controller : MonoBehaviour
         Gizmos.DrawWireSphere(transform.position, radius);
     }
 
+    #region Movement
     public void IdleMovement(Vector2 direction)
     {
         //rb.MovePosition(rb.position + new Vector2(transform.up.x, transform.up.y) * moveSpeed * Time.fixedDeltaTime);
@@ -134,7 +152,7 @@ public class Controller : MonoBehaviour
         rb.rotation = angle;
 
     }
-    
+   
     public void ChaseMovement()
     {
         rb.MovePosition(rb.position + new Vector2(transform.up.x, transform.up.y) * moveSpeed * Time.fixedDeltaTime);
@@ -152,6 +170,7 @@ public class Controller : MonoBehaviour
         if (reachedEndOfPath)
             currentState = State.Idle;
     }
+    #endregion Movement
 
     public void Hit(float damage)
     {
@@ -197,6 +216,78 @@ public class Controller : MonoBehaviour
         }
     }
 
+    #region Attack
+    IEnumerator CheckIfBarricadeOnPath()
+    {
+        while (true)
+        {
+            RaycastHit2D hit = Physics2D.Raycast(rb.position, transform.up, attackRange, barricadeMask);
+            if (hit.collider != null)
+            {
+                attackTarget = hit.collider.gameObject;
+                attackPoint = hit.point;
+            }
+            else
+                attackPoint = Vector2.zero;
+            yield return new WaitForSecondsRealtime(0.1f);
+        }        
+    }
+
+    IEnumerator TargetInRange()
+    {
+        rangeCheck = true;
+        while (true)
+        {
+            if (attackTarget != null)
+            {
+                if ((attackTarget.transform.position - transform.position).sqrMagnitude < attackRange * attackRange)
+                {
+                    withinRange = true;
+                }
+                else if (attackPoint != Vector2.zero && (attackPoint - rb.position).sqrMagnitude < attackRange * attackRange)
+                {
+                    withinRange = true;
+                }
+                else
+                {
+                    withinRange = false;
+                }
+            }
+
+            if (!rangeCheck)
+                break;
+            yield return new WaitForSeconds(0.1f);
+        }
+    }
+
+    IEnumerator Attack()
+    {
+        while (true)
+        {
+            if (withinRange)
+            {
+                if (attackTarget != null)
+                {
+                    moveSpeed = 0;
+                    yield return new WaitForSecondsRealtime(attackSpeed / 5);
+                    attack.enabled = true;
+                    attackTarget.SendMessage("Attacked", AttackDamage());
+                    yield return new WaitForSeconds(0.1f);
+                    moveSpeed = prevMoveSpeed;
+                    attack.enabled = false;
+                }
+            }
+            yield return new WaitForSecondsRealtime((attackSpeed / 5) * 4);
+        }
+    }
+
+    public float AttackDamage()
+    {
+        return Mathf.Floor(attackDamage + Random.Range(-attackDamage / 10, attackDamage / 10));
+    }
+    #endregion Attack
+
+    #region Navigation
     public void SoundHeard(Vector2 pos)
     {
         if (currentState != State.Chasing)
@@ -283,7 +374,6 @@ public class Controller : MonoBehaviour
             }
             else if (hit.collider.CompareTag("Player"))
             {
-                print("Found Player");
                 target = hit.collider.gameObject;
             }
         }
@@ -335,6 +425,7 @@ public class Controller : MonoBehaviour
             return true;
         }
     }
+    #endregion Navigation
 
     public Vector2 DirFromAngle(float angleInDegrees)
     {

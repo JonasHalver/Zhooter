@@ -16,8 +16,8 @@ public class PlayerAim : MonoBehaviour
 
     void FixedUpdate()
     {
-        Vector2 mouseDir = mousePos - rb.position;
-        float angle = Mathf.Atan2(mouseDir.y, mouseDir.x) * Mathf.Rad2Deg - 90f;
+        Vector2 mouseDir = (mousePos - rb.position).normalized;
+        float angle = Mathf.Atan2(mouseDir.y, mouseDir.x) * Mathf.Rad2Deg - 90;
         rb.rotation = angle;
     }
 }

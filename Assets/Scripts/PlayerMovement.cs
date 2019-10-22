@@ -9,6 +9,7 @@ public class PlayerMovement : MonoBehaviour
 
     Vector2 movement;
     bool rolling, cd;
+    public static bool invulnerable;
 
 
     void Update()
@@ -31,6 +32,7 @@ public class PlayerMovement : MonoBehaviour
     IEnumerator Roll(Vector2 direction)
     {
         rolling = true;
+        invulnerable = true;
         Vector2 prevPos = rb.position;
         while (true)
         {
@@ -44,6 +46,7 @@ public class PlayerMovement : MonoBehaviour
         }
         StartCoroutine(CoolDown());
         rolling = false;
+        invulnerable = false;
     }
 
     IEnumerator CoolDown()
@@ -51,5 +54,14 @@ public class PlayerMovement : MonoBehaviour
         cd = true;
         yield return new WaitForSeconds(rollCoolDown);
         cd = false;
+    }
+
+    void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other.name == "Wood")
+        {
+            Destroy(other.gameObject);
+            Manager.woodCount++;
+        }
     }
 }

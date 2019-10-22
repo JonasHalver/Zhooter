@@ -15,20 +15,24 @@ public class Shooting : MonoBehaviour
     public float damage = 40f;
     public float soundRadius = 5;
     public LayerMask enemyMask;
+    public Light muzzleFlash;
 
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetButtonDown("Fire1"))
+        if (Manager.currentState == Manager.State.Shooting)
         {
-            if (ammoSpent != ammoMax)
-                Shoot();
-            else
-                Reload();
+            if (Input.GetButtonDown("Fire1"))
+            {
+                if (ammoSpent != ammoMax)
+                    Shoot();
+                else
+                    Reload();
+            }
+            if (Input.GetButtonDown("Reload"))
+                if (ammoSpent != 0)
+                    Reload();
         }
-        if (Input.GetButtonDown("Reload"))
-            if (ammoSpent != 0)
-                Reload();
     }
 
     public void Shoot()
@@ -42,8 +46,16 @@ public class Shooting : MonoBehaviour
         alpha.a = 0;
         img.color = alpha;
         SoundWave();
+        StartCoroutine(MuzzleFlash());
         ammoSpent++;
         Destroy(newBullet, 2f);
+    }
+
+    IEnumerator MuzzleFlash()
+    {
+        muzzleFlash.enabled = true;
+        yield return new WaitForSecondsRealtime(0.05f);
+        muzzleFlash.enabled = false;
     }
 
     public void SoundWave()
