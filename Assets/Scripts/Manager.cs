@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Manager : MonoBehaviour
 {
-    public enum State { Idle, Shooting, Building }
+    public enum State { Idle, Shooting, Building, Reinforcing }
     public static State currentState = State.Idle;
 
     public static float costPerMeter = 1, costOfCurrentBuild;
@@ -20,6 +20,7 @@ public class Manager : MonoBehaviour
     public static int minutes, seconds;
     public static bool nightStarted;
     public static int spawnDelay = 10;
+    public static float reinforceArmor = 10f;
 
     // Start is called before the first frame update
     void Start()
@@ -43,6 +44,9 @@ public class Manager : MonoBehaviour
                     currentState = State.Building;
                     break;
                 case State.Building:
+                    currentState = State.Reinforcing;
+                    break;
+                case State.Reinforcing:
                     currentState = State.Idle;
                     break;
             }

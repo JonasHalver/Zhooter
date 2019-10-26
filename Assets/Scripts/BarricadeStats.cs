@@ -11,7 +11,11 @@ public class BarricadeStats : MonoBehaviour
     float width;
     [HideInInspector]
     public bool reinforced;
+    public float armor;
     public float value;
+
+    public List<Sprite> numbers = new List<Sprite>();
+    public SpriteRenderer first, second, shield;
 
     public GameObject woodPrefab, metalPrefab;
     Vector3 midpoint = Vector3.zero;
@@ -29,6 +33,16 @@ public class BarricadeStats : MonoBehaviour
         ColliderUpdate();
         if (health <= 0)
             Destroyed();
+
+        if (reinforced)
+        {
+            shield.transform.position = midpoint-Vector3.forward;
+            first.sprite = numbers[ConvertIntToIndex((int)armor, 2)];
+            second.sprite = numbers[ConvertIntToIndex((int)armor, 1)];
+            shield.enabled = true;
+            first.enabled = true;
+            second.enabled = true;
+        }
     }
 
     public void Build()
@@ -101,7 +115,7 @@ public class BarricadeStats : MonoBehaviour
         if (!reinforced)
             health -= damage;
         else
-            health -= (damage / 3) * 2;
+            health -= damage - armor;
     }
 
     void Destroyed()
@@ -115,5 +129,15 @@ public class BarricadeStats : MonoBehaviour
             }
         }
         Destroy(gameObject);
+    }
+
+    int ConvertIntToIndex(int num, int nth)
+    {
+        int result = (num / (int)Mathf.Pow(10, nth - 1)) % 10;
+        if (result == 0)
+            result = 9;
+        else
+            result -= 1;
+        return result;
     }
 }

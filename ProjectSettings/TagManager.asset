@@ -7,6 +7,7 @@ TagManager:
   - Zombie
   - Obstacle
   - Barricade
+  - HeatSource
   layers:
   - Default
   - TransparentFX

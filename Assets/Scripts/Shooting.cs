@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 
 public class Shooting : MonoBehaviour
 {
@@ -22,16 +23,19 @@ public class Shooting : MonoBehaviour
     {
         if (Manager.currentState == Manager.State.Shooting)
         {
-            if (Input.GetButtonDown("Fire1"))
+            if (!EventSystem.current.IsPointerOverGameObject())
             {
-                if (ammoSpent != ammoMax)
-                    Shoot();
-                else
-                    Reload();
+                if (Input.GetButtonDown("Fire1"))
+                {
+                    if (ammoSpent != ammoMax)
+                        Shoot();
+                    else
+                        Reload();
+                }
+                if (Input.GetButtonDown("Reload"))
+                    if (ammoSpent != 0)
+                        Reload();
             }
-            if (Input.GetButtonDown("Reload"))
-                if (ammoSpent != 0)
-                    Reload();
         }
     }
 
