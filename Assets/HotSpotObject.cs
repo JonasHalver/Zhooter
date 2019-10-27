@@ -8,10 +8,12 @@ public class HotSpotObject : MonoBehaviour
     public SpriteRenderer sr;
 
     public Color coldest, warmest;
+    public Gradient coldToWarm;
 
     public float temperature;
 
     public List<HeatSource> heatSources = new List<HeatSource>();
+    public bool ignore;
 
     // Start is called before the first frame update
     void Start()
@@ -20,11 +22,15 @@ public class HotSpotObject : MonoBehaviour
     }
 
     // Update is called once per frame
-    void Update()
+    void FixedUpdate()
     {
+        ignore = hs.ignoreDuringLoops;
         hs.temperature = Mathf.Clamp(hs.temperature, HeatMap.lowestTemp, HeatMap.highestTemp);
         temperature = hs.temperature;
-        sr.color = TemperatureColor();
+        if (hs.affectedByTemp)
+            sr.color = TemperatureColor();
+        else
+            sr.color = Color.black;
     }
 
     public Color TemperatureColor()
@@ -32,27 +38,13 @@ public class HotSpotObject : MonoBehaviour
         float dif = HeatMap.highestTemp - HeatMap.lowestTemp;
         float point = hs.temperature - HeatMap.lowestTemp;
         float t = point / dif;
-        return Color.Lerp(coldest, warmest, t);
+        return coldToWarm.Evaluate(t);
+        //return Color.Lerp(coldest, warmest, t);
     }
 
     void OnTriggerEnter2D(Collider2D col)
     {
-        if (col.GetComponent<HeatSource>() != null)
-        {
-            print("Entered hotspot");
-            HeatSource hs = col.GetComponent<HeatSource>();
-            if (!heatSources.Contains(hs))
-                heatSources.Add(hs);
-        }
-    }
-
-    void OnTriggerExit2D(Collider2D col)
-    {
-        if (col.GetComponent<HeatSource>() != null)
-        {
-            HeatSource hs = col.GetComponent<HeatSource>();
-            if (heatSources.Contains(hs))
-                heatSources.Remove(hs);
-        }
+        if (col.CompareTag("Obstacle"))
+            hs.affectedByTemp = false;
     }
 }

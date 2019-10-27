@@ -8,6 +8,7 @@ TagManager:
   - Obstacle
   - Barricade
   - HeatSource
+  - HotSpot
   layers:
   - Default
   - TransparentFX
@@ -21,8 +22,8 @@ TagManager:
   - Player
   - Enemy
   - Barricade
-  - 
-  - 
+  - HotSpot
+  - Indoor
   - 
   - 
   - 

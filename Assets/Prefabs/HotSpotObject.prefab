@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 9150472862504520278}
   - component: {fileID: 1054032141498999796}
   - component: {fileID: 6114957494253390527}
-  m_Layer: 0
+  m_Layer: 12
   m_Name: HotSpotObject
   m_TagString: HotSpot
   m_Icon: {fileID: 0}
@@ -97,7 +97,38 @@ MonoBehaviour:
   sr: {fileID: 9150472862504520278}
   coldest: {r: 0.05724907, g: 0, b: 1, a: 1}
   warmest: {r: 1, g: 0.8518007, b: 0, a: 1}
+  coldToWarm:
+    serializedVersion: 2
+    key0: {r: 0, g: 0.0034777757, b: 0.4433962, a: 1}
+    key1: {r: 0, g: 0.37680292, b: 1, a: 1}
+    key2: {r: 0.32003558, g: 1, b: 0, a: 0}
+    key3: {r: 0.99246013, g: 1, b: 0.11792451, a: 0}
+    key4: {r: 1, g: 0.2994857, b: 0, a: 0}
+    key5: {r: 1, g: 0, b: 0.17377076, a: 0}
+    key6: {r: 1, g: 0, b: 0.5339489, a: 0}
+    key7: {r: 1, g: 1, b: 1, a: 0}
+    ctime0: 0
+    ctime1: 9252
+    ctime2: 24865
+    ctime3: 34310
+    ctime4: 44140
+    ctime5: 54548
+    ctime6: 60909
+    ctime7: 65535
+    atime0: 0
+    atime1: 65535
+    atime2: 0
+    atime3: 0
+    atime4: 0
+    atime5: 0
+    atime6: 0
+    atime7: 0
+    m_Mode: 0
+    m_NumColorKeys: 8
+    m_NumAlphaKeys: 2
   temperature: 0
+  heatSources: []
+  ignore: 0
 --- !u!61 &6114957494253390527
 BoxCollider2D:
   m_ObjectHideFlags: 0
